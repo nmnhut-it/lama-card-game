@@ -115,6 +115,7 @@
     _startRound: function () {
       this._round = this._game.startNewRound();
       this._isProcessing = false;
+      window.LAMA.PileDisplay.resetScatter();
       this._rebuildUI();
       this._beginTurn();
     },
