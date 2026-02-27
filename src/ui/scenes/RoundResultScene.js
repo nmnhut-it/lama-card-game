@@ -16,21 +16,21 @@
   var Display = constants.Display;
   var PLAYER_COUNT = constants.PLAYER_COUNT;
 
-  /* Layout from screens.md */
+  /* Layout — centered on canvas (960x640) */
   var HEADER_X = 480;
   var HEADER_Y = 570;
-  var TABLE_HEADER_Y = 490;
-  var PLAYER_ROW_START_Y = 440;
+  var TABLE_HEADER_Y = 510;
+  var PLAYER_ROW_START_Y = 455;
   var PLAYER_ROW_SPACING = 50;
-  var WINNER_LABEL_Y = 220;
+  var WINNER_LABEL_Y = 195;
   var CONTINUE_BTN_X = 480;
   var CONTINUE_BTN_Y = 100;
 
-  /* Table column X positions */
-  var COL_NAME_X = 200;
-  var COL_CARDS_X = 380;
-  var COL_ROUND_X = 540;
-  var COL_TOTAL_X = 700;
+  /* Table column X positions — padded 100px inside panel edges */
+  var COL_NAME_X = 230;
+  var COL_CARDS_X = 400;
+  var COL_ROUND_X = 580;
+  var COL_TOTAL_X = 730;
 
   /* Text content */
   var HEADER_TEXT = 'Round Results';
@@ -51,16 +51,16 @@
   /* Score panel background (semi-transparent dark panel) */
   var PANEL_COLOR = cc.color(0, 0, 0, 60);
   var PANEL_BORDER_COLOR = cc.color(255, 255, 255, 30);
-  var PANEL_CENTER_X = 450;
-  var PANEL_CENTER_Y = 380;
-  var PANEL_HW = 300;
-  var PANEL_HH = 140;
+  var PANEL_CENTER_X = 480;
+  var PANEL_CENTER_Y = 385;
+  var PANEL_HW = 350;
+  var PANEL_HH = 160;
   var PANEL_CORNER = 8;
 
-  /* Table row stripe */
+  /* Table row stripe — narrower than panel for inner padding */
   var ROW_STRIPE_COLOR = cc.color(0, 0, 0, 30);
   var ROW_WINNER_STRIPE_COLOR = cc.color(255, 215, 0, 40);
-  var ROW_STRIPE_HW = 280;
+  var ROW_STRIPE_HW = 310;
   var ROW_STRIPE_HH = 18;
 
   /* Text colors */
