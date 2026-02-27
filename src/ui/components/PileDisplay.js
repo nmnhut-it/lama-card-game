@@ -28,8 +28,10 @@
   ];
   var STACK_SHADOW_COLOR = cc.color(0, 0, 0, 50);
 
-  /* Discard pile slight rotation for natural look (degrees) */
-  var DISCARD_ROTATION = 3;
+  /* Discard pile random scatter for natural look */
+  var DISCARD_ROTATION_RANGE = 8;
+  var DISCARD_OFFSET_RANGE = 4;
+  var DISCARD_STACK_VISIBLE = 2;
 
   /* Count badge */
   var BADGE_RADIUS = 14;
@@ -119,20 +121,28 @@
     return badge;
   }
 
+  /** Random float in [-range, +range] for natural scatter */
+  function _randScatter(range) {
+    return (Math.random() * 2 - 1) * range;
+  }
+
   /**
-   * Create the discard pile with slight rotation.
+   * Create the discard pile with random scatter.
    * @param {Card} topCard - Current top discard card
    * @returns {cc.Node}
    */
   function _createDiscardPile(topCard) {
     var CardSpriteModule = window.LAMA.CardSprite;
     var cardNode = CardSpriteModule.create(topCard, true, null);
-    cardNode.setPosition(DISCARD_PILE_X, DISCARD_PILE_Y);
-    cardNode.setRotation(DISCARD_ROTATION);
+    var ox = _randScatter(DISCARD_OFFSET_RANGE);
+    var oy = _randScatter(DISCARD_OFFSET_RANGE);
+    cardNode.setPosition(DISCARD_PILE_X + ox, DISCARD_PILE_Y + oy);
+    cardNode.setRotation(_randScatter(DISCARD_ROTATION_RANGE));
 
     var wrapper = new cc.Node();
-    wrapper.addChild(cardNode);
+    wrapper.addChild(cardNode, 1);
     wrapper._cardNode = cardNode;
+    wrapper._underCards = [];
     return wrapper;
   }
 
@@ -150,21 +160,31 @@
   }
 
   /**
-   * Update the discard pile top card.
+   * Update the discard pile top card, keeping previous cards visible.
    * @param {cc.Node} pileNode - The pile display node
    * @param {Card} topCard - New top card
    */
   function updateDiscardTop(pileNode, topCard) {
-    var discardWrapper = pileNode._discardPile;
-    if (discardWrapper._cardNode) {
-      discardWrapper.removeChild(discardWrapper._cardNode);
+    var dw = pileNode._discardPile;
+    /* Push current top card to under-stack */
+    if (dw._cardNode) {
+      dw._underCards.push(dw._cardNode);
     }
+    /* Remove oldest under-card if stack exceeds limit */
+    while (dw._underCards.length > DISCARD_STACK_VISIBLE) {
+      var oldest = dw._underCards.shift();
+      dw.removeChild(oldest);
+    }
+    /* Add new top card with random scatter */
     var CardSpriteModule = window.LAMA.CardSprite;
+    var zTop = DISCARD_STACK_VISIBLE + 1;
+    var ox = _randScatter(DISCARD_OFFSET_RANGE);
+    var oy = _randScatter(DISCARD_OFFSET_RANGE);
     var newCard = CardSpriteModule.create(topCard, true, null);
-    newCard.setPosition(DISCARD_PILE_X, DISCARD_PILE_Y);
-    newCard.setRotation(DISCARD_ROTATION);
-    discardWrapper.addChild(newCard);
-    discardWrapper._cardNode = newCard;
+    newCard.setPosition(DISCARD_PILE_X + ox, DISCARD_PILE_Y + oy);
+    newCard.setRotation(_randScatter(DISCARD_ROTATION_RANGE));
+    dw.addChild(newCard, zTop);
+    dw._cardNode = newCard;
   }
 
   exports.PileDisplay = {
