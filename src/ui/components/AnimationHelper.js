@@ -26,6 +26,14 @@
   var HIGHLIGHT_FADE_DURATION = 0.3;
   var THINKING_DOT_INTERVAL = 0.45;
 
+  /* Thinking indicator ribbon */
+  var THINKING_BG_COLOR = cc.color(0, 0, 0, 140);
+  var THINKING_BORDER_COLOR = cc.color(200, 200, 200, 60);
+  var THINKING_DOT_COLOR = cc.color(180, 220, 180);
+  var THINKING_RIBBON_HW = 75;
+  var THINKING_RIBBON_HH = 16;
+  var THINKING_RIBBON_CORNER = 8;
+
   /* Shake animation constants */
   var SHAKE_OFFSET = 5;
   var SHAKE_STEP_DURATION = 0.05;
@@ -200,12 +208,33 @@
   function createThinkingIndicator(x, y) {
     var node = new cc.Node();
     node.setPosition(x, y);
+    var bg = new cc.DrawNode();
+    bg.drawPoly(
+      _thinkingRibbonVerts(THINKING_RIBBON_HW, THINKING_RIBBON_HH,
+        THINKING_RIBBON_CORNER),
+      THINKING_BG_COLOR, 1, THINKING_BORDER_COLOR
+    );
+    node.addChild(bg, Display.Z_UI - 1);
+    var dot = new cc.DrawNode();
+    dot.drawDot(cc.p(-THINKING_RIBBON_HW + 14, 0), 4, THINKING_DOT_COLOR);
+    node.addChild(dot, Display.Z_UI);
     var label = new cc.LabelTTF('', 'Arial', Display.FONT_SIZE_BODY);
-    label.setColor(cc.color(255, 255, 200));
+    label.setColor(cc.color(255, 255, 255));
+    label.setPosition(8, 0);
     node.addChild(label, Display.Z_UI);
     node._label = label;
     node._dotCount = 0;
     return node;
+  }
+
+  /** Build chamfered rect vertices for thinking ribbon */
+  function _thinkingRibbonVerts(hw, hh, c) {
+    return [
+      cc.p(-hw + c, -hh), cc.p(hw - c, -hh),
+      cc.p(hw, -hh + c), cc.p(hw, hh - c),
+      cc.p(hw - c, hh), cc.p(-hw + c, hh),
+      cc.p(-hw, hh - c), cc.p(-hw, -hh + c)
+    ];
   }
 
   /**
