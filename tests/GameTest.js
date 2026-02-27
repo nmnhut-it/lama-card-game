@@ -7,7 +7,7 @@
 const { describe, it, assert } = require('./test-runner');
 const { GAME_CONSTANTS } = require('./test-helpers');
 
-let Game, Card, CardValue, GameMode, RoundEndReason;
+let Game, Card, CardValue, GameMode, RoundEndReason, NEXT_VALUE;
 try {
   Game = require('../src/game/Game').Game;
   Card = require('../src/game/Card').Card;
@@ -15,6 +15,7 @@ try {
   CardValue = constants.CardValue;
   GameMode = constants.GameMode;
   RoundEndReason = constants.RoundEndReason;
+  NEXT_VALUE = constants.NEXT_VALUE;
 } catch (e) {
   console.log('  SKIP: Game dependencies not yet available - ' + e.message);
 }
@@ -201,5 +202,96 @@ describe('Game - Standings', () => {
         'Standings should be ascending'
       );
     }
+  });
+});
+
+describe('Game - Empty hand bonus with token exchange', () => {
+
+  /**
+   * Helper: set up a round where the target player empties their hand
+   * by actually playing their last card (triggering proper round end).
+   * Advances turns to the target, replaces hand with a single playable
+   * card, then plays it.
+   */
+  function setupEmptyHandRound(game, targetPlayerIndex) {
+    const round = game.startNewRound();
+    const target = game.getPlayers()[targetPlayerIndex];
+    var topCardValue = round.getTopCard().getValue();
+
+    /* Advance to target player's turn, quitting others along the way */
+    var safetyLimit = GAME_CONSTANTS.PLAYER_COUNT * 2;
+    while (round.getCurrentPlayerIndex() !== targetPlayerIndex && safetyLimit > 0) {
+      safetyLimit--;
+      round.quitRound(round.getCurrentPlayer());
+      round.advanceTurn();
+    }
+
+    /* Replace target's hand with a single card matching the top card */
+    while (target.getHandSize() > 0) {
+      target.removeCard(target.getHand()[0]);
+    }
+    var playableCard = new Card(topCardValue);
+    target.addCard(playableCard);
+
+    /* Play the last card → hand empty → round ends */
+    round.playCard(target, playableCard);
+    assert.ok(round.isRoundOver(), 'Round should end when hand empties');
+    return round;
+  }
+
+  it('should exchange white->black before returning when player has 10+ white', () => {
+    if (skipIfNoSource()) return;
+    const game = new Game(GameMode.AI);
+    const target = game.getPlayers()[0];
+
+    /* Simulate prior-round tokens: 12 white, 0 black */
+    target.addWhiteTokens(12);
+    assert.equal(target.totalPoints(), 12);
+
+    setupEmptyHandRound(game, 0);
+    const summary = game.scoreRound();
+    assert.equal(summary.handEmptyPlayer, 0, 'Player 0 emptied hand');
+    assert.equal(summary.tokenReturned, 'black',
+      'Should exchange white->black then return black');
+    assert.equal(summary.players[0].totalPoints, 2,
+      'Should save 10 pts: 12 - 10 = 2');
+  });
+
+  it('should return 1 black when player already has black tokens', () => {
+    if (skipIfNoSource()) return;
+    const game = new Game(GameMode.AI);
+    const target = game.getPlayers()[0];
+
+    target.addBlackTokens(1);
+    assert.equal(target.totalPoints(), 10);
+
+    setupEmptyHandRound(game, 0);
+    const summary = game.scoreRound();
+    assert.equal(summary.tokenReturned, 'black');
+    assert.equal(summary.players[0].totalPoints, 0,
+      'Returning 1 black saves 10 pts: 10 - 10 = 0');
+  });
+
+  it('should return 1 white when player has < 10 white and 0 black', () => {
+    if (skipIfNoSource()) return;
+    const game = new Game(GameMode.AI);
+    const target = game.getPlayers()[0];
+
+    target.addWhiteTokens(3);
+
+    setupEmptyHandRound(game, 0);
+    const summary = game.scoreRound();
+    assert.equal(summary.tokenReturned, 'white');
+    assert.equal(summary.players[0].totalPoints, 2, '3 - 1 = 2');
+  });
+
+  it('should return null when empty-hand player has 0 tokens', () => {
+    if (skipIfNoSource()) return;
+    const game = new Game(GameMode.AI);
+
+    setupEmptyHandRound(game, 0);
+    const summary = game.scoreRound();
+    assert.equal(summary.tokenReturned, null, 'No tokens to return');
+    assert.equal(summary.players[0].totalPoints, 0);
   });
 });

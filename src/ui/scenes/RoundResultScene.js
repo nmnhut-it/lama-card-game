@@ -37,7 +37,9 @@
   var COL_HEADERS = ['Player', 'Cards Left', 'Round Pts', 'Total Pts'];
   var NEXT_ROUND_LABEL = 'Next Round';
   var FINAL_RESULTS_LABEL = 'Final Results';
-  var HAND_EMPTY_MSG = ' emptied hand! Returns 1 token.';
+  var HAND_EMPTY_RETURN_BLACK_MSG = ' emptied hand! Returns 1 black token (-10 pts).';
+  var HAND_EMPTY_RETURN_WHITE_MSG = ' emptied hand! Returns 1 white token (-1 pt).';
+  var HAND_EMPTY_NO_RETURN_MSG = ' emptied hand! (No tokens to return)';
   var ALL_QUIT_MSG = 'All players quit.';
 
   /* Background colors */
@@ -252,7 +254,14 @@
   function _addWinnerLabel(layer, game, summary) {
     var text;
     if (summary.handEmptyPlayer !== null) {
-      text = 'Player ' + (summary.handEmptyPlayer + 1) + HAND_EMPTY_MSG;
+      var prefix = 'Player ' + (summary.handEmptyPlayer + 1);
+      if (summary.tokenReturned === 'black') {
+        text = prefix + HAND_EMPTY_RETURN_BLACK_MSG;
+      } else if (summary.tokenReturned === 'white') {
+        text = prefix + HAND_EMPTY_RETURN_WHITE_MSG;
+      } else {
+        text = prefix + HAND_EMPTY_NO_RETURN_MSG;
+      }
     } else {
       text = ALL_QUIT_MSG;
     }

@@ -64,10 +64,17 @@
 
   /**
    * Returns the best token a player has (black first, then white).
-   * Used for the empty-hand bonus. Returns the type returned, or null.
+   * Per GDD, players can exchange at any time — so if the player has
+   * no black but >= BLACK_TOKEN_VALUE white, exchange first, then
+   * return the black token (saving 10 pts instead of 1).
    */
   TokenBank.prototype.returnBestToken = function (player) {
     if (player.getBlackTokens() > 0) {
+      this.returnToken(player, TokenType.BLACK);
+      return TokenType.BLACK;
+    }
+    if (this._canExchangeWhiteToBlack(player)) {
+      this._exchangeWhiteToBlack(player);
       this.returnToken(player, TokenType.BLACK);
       return TokenType.BLACK;
     }
@@ -76,6 +83,11 @@
       return TokenType.WHITE;
     }
     return null;
+  };
+
+  /** True if the player can exchange 10 white for 1 black */
+  TokenBank.prototype._canExchangeWhiteToBlack = function (player) {
+    return player.getWhiteTokens() >= BLACK_TOKEN_VALUE && this._black >= 1;
   };
 
   /**

@@ -179,6 +179,71 @@ describe('TokenBank - Supply Limits', () => {
   });
 });
 
+/* --- returnBestToken with exchange --- */
+
+describe('TokenBank - returnBestToken exchange optimization', () => {
+  it('should return black token when player has black tokens', () => {
+    const bank = new TokenBank();
+    const player = new Player(0);
+    bank.distributeTokens(player, BLACK_TOKEN_VALUE);
+    assert.equal(player.getBlackTokens(), 1);
+    const returned = bank.returnBestToken(player);
+    assert.equal(returned, BLACK);
+    assert.equal(player.getBlackTokens(), 0);
+    assert.equal(player.totalPoints(), 0);
+  });
+
+  it('should exchange 10 white to 1 black before returning when no black tokens', () => {
+    const bank = new TokenBank();
+    const player = new Player(0);
+    /* Give 15 white tokens (simulate prior rounds with small penalties) */
+    bank.distributeTokens(player, 5);
+    bank.distributeTokens(player, 5);
+    bank.distributeTokens(player, 5);
+    assert.equal(player.getWhiteTokens(), 15);
+    assert.equal(player.getBlackTokens(), 0);
+    assert.equal(player.totalPoints(), 15);
+
+    const returned = bank.returnBestToken(player);
+    assert.equal(returned, BLACK, 'Should exchange white->black then return black');
+    assert.equal(player.totalPoints(), 5, 'Should save 10 pts (15 - 10)');
+  });
+
+  it('should exchange and return when player has exactly 10 white tokens', () => {
+    const bank = new TokenBank();
+    const player = new Player(0);
+    bank.distributeTokens(player, BLACK_TOKEN_VALUE);
+    /* Exchange black to white so player has 10 white, 0 black */
+    bank.exchange(player, BLACK);
+    assert.equal(player.getWhiteTokens(), BLACK_TOKEN_VALUE);
+    assert.equal(player.getBlackTokens(), 0);
+
+    const returned = bank.returnBestToken(player);
+    assert.equal(returned, BLACK, 'Should exchange 10 white->1 black then return');
+    assert.equal(player.totalPoints(), 0, 'Should save all 10 pts');
+  });
+
+  it('should return white when player has < 10 white and 0 black', () => {
+    const bank = new TokenBank();
+    const player = new Player(0);
+    bank.distributeTokens(player, 3);
+    assert.equal(player.getWhiteTokens(), 3);
+    assert.equal(player.getBlackTokens(), 0);
+
+    const returned = bank.returnBestToken(player);
+    assert.equal(returned, WHITE, 'Not enough white to exchange, return 1 white');
+    assert.equal(player.totalPoints(), 2);
+  });
+
+  it('should return null when player has no tokens at all', () => {
+    const bank = new TokenBank();
+    const player = new Player(0);
+    const returned = bank.returnBestToken(player);
+    assert.equal(returned, null);
+    assert.equal(player.totalPoints(), 0);
+  });
+});
+
 /* --- Total Points via Tokens --- */
 
 describe('TokenBank - Player Total Points', () => {
@@ -190,6 +255,46 @@ describe('TokenBank - Player Total Points', () => {
       + (player.getWhiteTokens() * WHITE_TOKEN_VALUE);
     assert.equal(player.totalPoints(), expected);
     assert.equal(player.totalPoints(), 23);
+  });
+});
+
+/* --- Scoring integration: penalty 10 → 1 black token --- */
+
+describe('TokenBank - Llama penalty (10 pts) scenarios', () => {
+  it('should give exactly 1 black token for penalty of 10', () => {
+    const bank = new TokenBank();
+    const player = new Player(0);
+    bank.distributeTokens(player, BLACK_TOKEN_VALUE);
+    assert.equal(player.getBlackTokens(), 1);
+    assert.equal(player.getWhiteTokens(), 0);
+    assert.equal(player.totalPoints(), BLACK_TOKEN_VALUE);
+  });
+
+  it('should give 1 black + 1 white for penalty of 11', () => {
+    const bank = new TokenBank();
+    const player = new Player(0);
+    bank.distributeTokens(player, 11);
+    assert.equal(player.getBlackTokens(), 1);
+    assert.equal(player.getWhiteTokens(), 1);
+    assert.equal(player.totalPoints(), 11);
+  });
+
+  it('should fall back to white tokens when black supply empty', () => {
+    const bank = new TokenBank();
+    const players = [];
+    /* Exhaust all black tokens (20 black = 200 pts worth) */
+    for (let i = 0; i < BLACK_TOKEN_COUNT; i++) {
+      const p = new Player(i % GAME_CONSTANTS.PLAYER_COUNT);
+      bank.distributeTokens(p, BLACK_TOKEN_VALUE);
+      players.push(p);
+    }
+    assert.equal(bank.getBlackSupply(), 0);
+
+    const newPlayer = new Player(0);
+    bank.distributeTokens(newPlayer, BLACK_TOKEN_VALUE);
+    assert.equal(newPlayer.getBlackTokens(), 0, 'No black tokens available');
+    assert.equal(newPlayer.getWhiteTokens(), BLACK_TOKEN_VALUE, 'Falls back to white');
+    assert.equal(newPlayer.totalPoints(), BLACK_TOKEN_VALUE);
   });
 });
 
