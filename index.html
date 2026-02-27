@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L.A.M.A. - Drop All Your Minus Points</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #gameCanvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="960" height="640"></canvas>
+
+  <!-- Cocos2d-x JS Engine (v3.13 single-file build) -->
+  <script src="frameworks/cocos2d-js-v3.13.js" charset="UTF-8"></script>
+
+  <!-- Game Constants (must load first) -->
+  <script src="src/constants.js"></script>
+
+  <!-- Core Game Logic -->
+  <script src="src/game/Card.js"></script>
+  <script src="src/game/Deck.js"></script>
+  <script src="src/game/Player.js"></script>
+  <script src="src/game/TokenBank.js"></script>
+  <script src="src/game/Round.js"></script>
+  <script src="src/game/Game.js"></script>
+
+  <!-- AI Logic -->
+  <script src="src/ai/AiPlayer.js"></script>
+
+  <!-- UI: Scene Manager -->
+  <script src="src/ui/SceneManager.js"></script>
+
+  <!-- UI: Components (load before scenes) -->
+  <script src="src/ui/components/CardSprite.js"></script>
+  <script src="src/ui/components/HandDisplay.js"></script>
+  <script src="src/ui/components/PileDisplay.js"></script>
+  <script src="src/ui/components/TokenDisplay.js"></script>
+  <script src="src/ui/components/PlayerPanel.js"></script>
+  <script src="src/ui/components/ActionButtons.js"></script>
+  <script src="src/ui/components/TurnOverlay.js"></script>
+  <script src="src/ui/components/ButtonHelper.js"></script>
+  <script src="src/ui/components/AnimationHelper.js"></script>
+
+  <!-- UI: Scenes -->
+  <script src="src/ui/scenes/TitleScene.js"></script>
+  <script src="src/ui/scenes/ModeSelectScene.js"></script>
+  <script src="src/ui/scenes/GameplayScene.js"></script>
+  <script src="src/ui/scenes/RoundResultScene.js"></script>
+  <script src="src/ui/scenes/FinalScoreScene.js"></script>
+
+  <!-- Application Entry Point -->
+  <script src="main.js"></script>
+</body>
+</html>

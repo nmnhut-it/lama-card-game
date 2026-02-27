@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L.A.M.A. Test Runner</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: monospace; background: #1e1e2e; color: #cdd6f4; padding: 20px; }
+    h1 { color: #89b4fa; margin-bottom: 10px; }
+    #summary { padding: 12px; margin: 12px 0; border-radius: 6px; font-size: 16px; }
+    .pass-bg { background: #1e3a2f; border: 1px solid #a6e3a1; }
+    .fail-bg { background: #3a1e1e; border: 1px solid #f38ba8; }
+    .suite-name { color: #cba6f7; font-weight: bold; margin: 12px 0 4px; }
+    .test-pass { color: #a6e3a1; margin-left: 16px; }
+    .test-fail { color: #f38ba8; margin-left: 16px; }
+    .error-msg { color: #fab387; margin-left: 32px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>L.A.M.A. Test Runner</h1>
+  <div id="summary">Loading...</div>
+  <div id="results"></div>
+  <!-- Source files in dependency order -->
+  <script src="../src/constants.js"></script>
+  <script src="../src/game/Card.js"></script>
+  <script src="../src/game/Deck.js"></script>
+  <script src="../src/game/Player.js"></script>
+  <script src="../src/game/TokenBank.js"></script>
+  <script src="../src/game/Round.js"></script>
+  <script src="../src/game/Game.js"></script>
+  <script src="../src/ai/AiPlayer.js"></script>
+  <!-- Test runner -->
+  <script src="testRunner-browser.js"></script>
+</body>
+</html>

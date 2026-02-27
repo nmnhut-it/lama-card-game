@@ -1,0 +1,17 @@
+# Claude Code / Playwright artifacts
+.claude/
+.playwright-mcp/
+
+# Screenshots (development/testing only)
+*.png
+screenshots/
+
+# Test artifacts
+test-output.txt
+tests/test-results.txt
+
+# Plan files
+plan*.md
+
+# Node
+node_modules/
