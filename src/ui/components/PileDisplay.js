@@ -206,8 +206,18 @@
   }
 
   /**
-   * Replace the discard pile top card. Increments discard counter
-   * so the next rebuild uses the same cached scatter for this card.
+   * Advance the discard counter and return the new scatter values.
+   * Called by animation code BEFORE the card lands, so the animation
+   * target matches what _createDiscardPile will use on rebuild.
+   * @returns {{ ox: number, oy: number, rot: number }}
+   */
+  function advanceScatter() {
+    _discardCount++;
+    return _getTopScatter();
+  }
+
+  /**
+   * Replace the discard pile top card using current cached scatter.
    * @param {cc.Node} pileNode - The pile display node
    * @param {Card} topCard - New top card
    */
@@ -216,7 +226,6 @@
     if (dw._cardNode) {
       dw.removeChild(dw._cardNode);
     }
-    _discardCount++;
     var ts = _getTopScatter();
     var CardSpriteModule = window.LAMA.CardSprite;
     var newCard = CardSpriteModule.create(topCard, true, null);
@@ -237,6 +246,7 @@
     create: createPileDisplay,
     updateDrawCount: updateDrawCount,
     updateDiscardTop: updateDiscardTop,
+    advanceScatter: advanceScatter,
     resetScatter: resetScatter
   };
 

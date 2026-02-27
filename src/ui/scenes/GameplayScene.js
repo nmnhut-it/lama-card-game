@@ -442,20 +442,30 @@
     _animatePlayCard: function (playerIdx, card, onComplete) {
       var Anim = window.LAMA.AnimationHelper;
       var CardSpriteModule = window.LAMA.CardSprite;
+      var PileDisplayModule = window.LAMA.PileDisplay;
       var startPos = this._findCardPosition(playerIdx, card);
+      var scatter = PileDisplayModule.advanceScatter();
 
       var tempCard = CardSpriteModule.create(card, true, null);
       tempCard.setPosition(startPos.x, startPos.y);
       this._layer.addChild(tempCard, Z_ANIM);
 
+      /* Single spawned action: move + scale + rotate all in sync */
+      var dur = Anim.SLIDE_DURATION;
+      var targetX = DISCARD_PILE_X + scatter.ox;
+      var targetY = DISCARD_PILE_Y + scatter.oy;
+      var move = cc.moveTo(dur, targetX, targetY).easing(cc.easeSineOut());
+      var scaleUp = cc.scaleTo(dur / 2, 1.2);
+      var scaleDown = cc.scaleTo(dur / 2, 1.0);
+      var rotate = cc.rotateTo(dur, scatter.rot).easing(cc.easeSineOut());
+      var combined = cc.spawn(move, cc.sequence(scaleUp, scaleDown), rotate);
+
       var self = this;
-      Anim.slideWithBump(tempCard, DISCARD_PILE_X, DISCARD_PILE_Y, function () {
+      tempCard.runAction(cc.sequence(combined, cc.callFunc(function () {
+        self._refreshPileDisplay();
         self._layer.removeChild(tempCard);
-        self._layer.scheduleOnce(function () {
-          self._refreshPileDisplay();
-          onComplete();
-        }, POST_PLAY_DELAY);
-      });
+        onComplete();
+      })));
     },
 
     /* ---- Animation #2: Card Draw (draw pile -> hand) ---- */
